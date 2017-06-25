@@ -578,7 +578,7 @@ namespace ICSharpCode.Decompiler.ILAst
 				ILAstOptimizer.RemoveRedundantCode(method);
 				// Repeat the inlining/copy propagation optimization because the conversion of field access
 				// to local variables can open up additional inlining possibilities.
-				ILInlining inlining = new ILInlining(method);
+				var inlining = new ILInlining(context, method);
 				inlining.InlineAllVariables();
 				inlining.CopyPropagation();
 			}

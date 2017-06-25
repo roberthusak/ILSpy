@@ -29,13 +29,15 @@ namespace ICSharpCode.Decompiler.ILAst
 	/// </summary>
 	public class ILInlining
 	{
+		readonly DecompilerContext context;
 		readonly ILBlock method;
 		internal Dictionary<ILVariable, int> numStloc  = new Dictionary<ILVariable, int>();
 		internal Dictionary<ILVariable, int> numLdloc  = new Dictionary<ILVariable, int>();
 		internal Dictionary<ILVariable, int> numLdloca = new Dictionary<ILVariable, int>();
 		
-		public ILInlining(ILBlock method)
+		public ILInlining(DecompilerContext context, ILBlock method)
 		{
+			this.context = context;
 			this.method = method;
 			AnalyzeMethod();
 		}
@@ -85,8 +87,11 @@ namespace ICSharpCode.Decompiler.ILAst
 		
 		public bool InlineAllVariables()
 		{
+			if (!context.Settings.CanInlineVariables)
+				return false;
+
 			bool modified = false;
-			ILInlining i = new ILInlining(method);
+			var i = new ILInlining(context, method);
 			foreach (ILBlock block in method.GetSelfAndChildrenRecursive<ILBlock>())
 				modified |= i.InlineAllInBlock(block);
 			return modified;
@@ -458,6 +463,9 @@ namespace ICSharpCode.Decompiler.ILAst
 		/// </summary>
 		public void CopyPropagation()
 		{
+			if (!context.Settings.CanInlineVariables)
+				return;
+
 			foreach (ILBlock block in method.GetSelfAndChildrenRecursive<ILBlock>()) {
 				for (int i = 0; i < block.Body.Count; i++) {
 					ILVariable v;

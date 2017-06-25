@@ -100,11 +100,11 @@ namespace ICSharpCode.Decompiler.ILAst
 			
 			if (abortBeforeStep == ILAstOptimizationStep.InlineVariables) return;
 			// Works better after simple goto removal because of the following debug pattern: stloc X; br Next; Next:; ldloc X
-			ILInlining inlining1 = new ILInlining(method);
-			inlining1.InlineAllVariables();
+			var inlining = new ILInlining(context, method);
+			inlining.InlineAllVariables();
 			
 			if (abortBeforeStep == ILAstOptimizationStep.CopyPropagation) return;
-			inlining1.CopyPropagation();
+			inlining.CopyPropagation();
 			
 			if (abortBeforeStep == ILAstOptimizationStep.YieldReturn) return;
 			YieldReturnDecompiler.Run(context, method);
@@ -189,8 +189,8 @@ namespace ICSharpCode.Decompiler.ILAst
 					}
 					
 					if (abortBeforeStep == ILAstOptimizationStep.InlineVariables2) return;
-					modified |= new ILInlining(method).InlineAllInBlock(block);
-					new ILInlining(method).CopyPropagation();
+					modified |= new ILInlining(context, method).InlineAllInBlock(block);
+					new ILInlining(context, method).CopyPropagation();
 					
 				} while(modified);
 			}
@@ -229,7 +229,7 @@ namespace ICSharpCode.Decompiler.ILAst
 			if (abortBeforeStep == ILAstOptimizationStep.InlineVariables3) return;
 			// The 2nd inlining pass is necessary because DuplicateReturns and the introduction of ternary operators
 			// open up additional inlining possibilities.
-			new ILInlining(method).InlineAllVariables();
+			new ILInlining(context, method).InlineAllVariables();
 			
 			if (abortBeforeStep == ILAstOptimizationStep.CachedDelegateInitialization) return;
 			if (context.Settings.AnonymousMethods) {

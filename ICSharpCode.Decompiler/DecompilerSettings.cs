@@ -135,6 +135,24 @@ namespace ICSharpCode.Decompiler
 			}
 		}
 
+		bool canInlineVariables = true;
+
+		/// <summary>
+		/// Inline variables where possible.
+		/// </summary>
+		public bool CanInlineVariables
+		{
+			get { return canInlineVariables; }
+			set
+			{
+				if (canInlineVariables != value)
+				{
+					canInlineVariables = value;
+					OnPropertyChanged("CanInlineVariables");
+				}
+			}
+		}
+
 		bool usingStatement = true;
 		
 		/// <summary>

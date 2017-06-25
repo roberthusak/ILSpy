@@ -211,7 +211,7 @@ namespace ICSharpCode.Decompiler.ILAst
 						if (parent.Arguments[j].Code == ILCode.Ldsfld && ((FieldReference)parent.Arguments[j].Operand).ResolveWithinSameModule() == field) {
 							parent.Arguments[j] = newObj;
 							block.Body.RemoveAt(i);
-							i -= new ILInlining(method).InlineInto(block.Body, i, aggressive: false);
+							i -= new ILInlining(context, method).InlineInto(block.Body, i, aggressive: false);
 							return;
 						}
 					}
@@ -256,7 +256,7 @@ namespace ICSharpCode.Decompiler.ILAst
 			if (followingNode != null && followingNode.GetSelfAndChildrenRecursive<ILExpression>().Count(
 				e => e.Code == ILCode.Ldloc && (ILVariable)e.Operand == v) == 1)
 			{
-				ILInlining inlining = new ILInlining(method);
+				var inlining = new ILInlining(context, method);
 				if (!(inlining.numLdloc.GetOrDefault(v) == 2 && inlining.numStloc.GetOrDefault(v) == 2 && inlining.numLdloca.GetOrDefault(v) == 0))
 					return;
 				
@@ -276,7 +276,7 @@ namespace ICSharpCode.Decompiler.ILAst
 				}
 				
 				block.Body[i] = stloc; // remove the 'if (v==null)'
-				inlining = new ILInlining(method);
+				inlining = new ILInlining(context, method);
 				inlining.InlineIfPossible(block.Body, ref i);
 			}
 		}
@@ -304,7 +304,7 @@ namespace ICSharpCode.Decompiler.ILAst
 					// anystore(v2, expr_44)
 					// ->
 					// stloc(v1, anystore(v2, ...))
-					ILInlining inlining = new ILInlining(method);
+					var inlining = new ILInlining(context, method);
 					if (inlining.numLdloc.GetOrDefault(exprVar) == 2 && inlining.numStloc.GetOrDefault(exprVar) == 1) {
 						body.RemoveAt(pos + 2); // remove store2
 						body.RemoveAt(pos); // remove expr = ...
@@ -369,7 +369,7 @@ namespace ICSharpCode.Decompiler.ILAst
 				modified |= MakeCompoundAssignments(null, arg, -1);
 			}
 			if (modified && body != null)
-				new ILInlining(method).InlineInto(body, pos, aggressive: false);
+				new ILInlining(context, method).InlineInto(body, pos, aggressive: false);
 			return modified;
 		}
 		
@@ -501,7 +501,7 @@ namespace ICSharpCode.Decompiler.ILAst
 			if (newExpr != null) {
 				modified = true;
 				body[pos] = newExpr;
-				new ILInlining(method).InlineIfPossible(body, ref pos);
+				new ILInlining(context, method).InlineIfPossible(body, ref pos);
 			}
 			return modified;
 		}
@@ -817,7 +817,7 @@ namespace ICSharpCode.Decompiler.ILAst
 								// Now check whether the loading expression was a store ot a temp. var
 								// that can be eliminated.
 								if (arrayLoadingExpr.Code == ILCode.Stloc) {
-									ILInlining inlining = new ILInlining(method);
+									var inlining = new ILInlining(context, method);
 									if (inlining.numLdloc.GetOrDefault(arrayVariable) == 2 &&
 									    inlining.numStloc.GetOrDefault(arrayVariable) == 1 && inlining.numLdloca.GetOrDefault(arrayVariable) == 0)
 									{

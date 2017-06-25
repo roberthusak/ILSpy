@@ -83,7 +83,7 @@ namespace ICSharpCode.Decompiler.ILAst
 					expr.Arguments[0] = new ILExpression(ILCode.InitArray, arrayType, operands);
 					body.RemoveRange(pos + 1, numberOfInstructionsToRemove);
 
-					new ILInlining(method).InlineIfPossible(body, ref pos);
+					new ILInlining(context, method).InlineIfPossible(body, ref pos);
 					return true;
 				}
 			}
@@ -310,7 +310,7 @@ namespace ICSharpCode.Decompiler.ILAst
 			if (pos >= body.Count)
 				return false; // reached end of block, but there should be another instruction which consumes the initialized object
 
-			ILInlining inlining = new ILInlining(method);
+			ILInlining inlining = new ILInlining(context, method);
 			if (isValueType) {
 				// one ldloc for the use of the initialized object
 				if (inlining.numLdloc.GetOrDefault(v) != 1)
@@ -347,7 +347,7 @@ namespace ICSharpCode.Decompiler.ILAst
 			// now that we know that it's an object initializer, change all the first arguments to 'InitializedObject'
 			ChangeFirstArgumentToInitializedObject(initializer);
 
-			inlining = new ILInlining(method);
+			inlining = new ILInlining(context, method);
 			inlining.InlineIfPossible(body, ref originalPos);
 
 			return true;

@@ -30,7 +30,7 @@ namespace ICSharpCode.Decompiler.ILAst
 		{
 			if (!new PatternMatcher(typeSystem).SimplifyLiftedOperators(expr)) return false;
 
-			var inlining = new ILInlining(method);
+			var inlining = new ILInlining(context, method);
 			while (--pos >= 0 && inlining.InlineIfPossible(body, ref pos)) ;
 
 			return true;
