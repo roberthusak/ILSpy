@@ -224,7 +224,25 @@ namespace ICSharpCode.Decompiler
 				}
 			}
 		}
-		
+
+		bool arrayInitializers = true;
+
+		/// <summary>
+		/// Gets/Sets whether to use array initializers
+		/// </summary>
+		public bool ArrayInitializers
+		{
+			get { return arrayInitializers; }
+			set
+			{
+				if (arrayInitializers != value)
+				{
+					arrayInitializers = value;
+					OnPropertyChanged("ArrayInitializers");
+				}
+			}
+		}
+
 		bool objectCollectionInitializers = true;
 		
 		/// <summary>

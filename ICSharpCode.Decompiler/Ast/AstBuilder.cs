@@ -84,7 +84,7 @@ namespace ICSharpCode.Decompiler.Ast
 					if (settings.AsyncAwait && AsyncDecompiler.IsCompilerGeneratedStateMachine(type))
 						return true;
 				} else if (type.IsCompilerGenerated()) {
-					if (type.Name.StartsWith("<PrivateImplementationDetails>", StringComparison.Ordinal))
+					if (settings.ArrayInitializers && type.Name.StartsWith("<PrivateImplementationDetails>", StringComparison.Ordinal))
 						return true;
 					if (type.IsAnonymousType())
 						return true;
@@ -1042,12 +1042,14 @@ namespace ICSharpCode.Decompiler.Ast
 			astField.Modifiers = ConvertModifiers(fieldDef);
 			if (fieldDef.HasConstant) {
 				initializer.Initializer = CreateExpressionForConstant(fieldDef.Constant, fieldDef.FieldType, fieldDef.DeclaringType.IsEnum);
+			} else if (fieldDef.InitialValue.Length > 0) {
+				initializer.Initializer = CreateExpressionForByteArrayAtDataLabel(fieldDef.InitialValue);
 			}
 			ConvertAttributes(astField, fieldDef);
 			SetNewModifier(astField);
 			return astField;
 		}
-		
+
 		static Expression CreateExpressionForConstant(object constant, TypeReference type, bool isEnumMemberDeclaration = false)
 		{
 			if (constant == null) {
@@ -1064,7 +1066,17 @@ namespace ICSharpCode.Decompiler.Ast
 				}
 			}
 		}
-		
+
+		static Expression CreateExpressionForByteArrayAtDataLabel(byte[] array)
+		{
+			var arguments = new PrimitiveExpression[array.Length];
+			for (var i = 0; i < array.Length; i++)
+			{
+				arguments[i] = new PrimitiveExpression(array[i]);
+			}
+			return new IdentifierExpression("bytearray").Invoke(arguments);
+		}
+
 		public static IEnumerable<ParameterDeclaration> MakeParameters(MethodDefinition method, bool isLambda = false)
 		{
 			var parameters = MakeParameters(method.Parameters, isLambda);

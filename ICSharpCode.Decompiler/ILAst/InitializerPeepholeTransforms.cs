@@ -32,6 +32,9 @@ namespace ICSharpCode.Decompiler.ILAst
 		#region Array Initializers
 		bool TransformArrayInitializers(List<ILNode> body, ILExpression expr, int pos)
 		{
+			if (!context.Settings.ArrayInitializers)
+				return false;
+
 			ILVariable v, v3;
 			ILExpression newarrExpr;
 			TypeReference elementType;
@@ -217,7 +220,7 @@ namespace ICSharpCode.Decompiler.ILAst
 				case TypeCode.Double:
 					return ILCode.Ldc_R8;
 				default:
-					throw new ArgumentOutOfRangeException("elementType");					
+					throw new ArgumentOutOfRangeException("elementType");
 			}
 		}
 
