@@ -424,7 +424,7 @@ namespace ICSharpCode.Decompiler.Ast
 						// AssignmentExpression doesn't support overloaded operators so they have to be processed to BinaryOperatorExpression
 						if (boe == null) {
 							var tmp = new ParenthesizedExpression(arg1);
-							ReplaceMethodCallsWithOperators.ProcessInvocationExpression((InvocationExpression)arg1);
+							ReplaceMethodCallsWithOperators.ProcessInvocationExpression((InvocationExpression)arg1, context.Settings);
 							boe = (BinaryOperatorExpression)tmp.Expression;
 						}
 						var assignment = new Ast.AssignmentExpression {

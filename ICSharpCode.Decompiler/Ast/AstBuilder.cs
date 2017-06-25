@@ -805,7 +805,7 @@ namespace ICSharpCode.Decompiler.Ast
 			}
 			
 			// Convert MethodDeclaration to OperatorDeclaration if possible
-			if (methodDef.IsSpecialName && !methodDef.HasGenericParameters) {
+			if (context.Settings.OperatorOverloading && methodDef.IsSpecialName && !methodDef.HasGenericParameters) {
 				OperatorType? opType = OperatorDeclaration.GetOperatorType(methodDef.Name);
 				if (opType.HasValue) {
 					OperatorDeclaration op = new OperatorDeclaration();

@@ -116,7 +116,25 @@ namespace ICSharpCode.Decompiler
 				}
 			}
 		}
-		
+
+		bool operatorOverloading = true;
+
+		/// <summary>
+		/// Decompile overloaded operators
+		/// </summary>
+		public bool OperatorOverloading
+		{
+			get { return operatorOverloading; }
+			set
+			{
+				if (operatorOverloading != value)
+				{
+					operatorOverloading = value;
+					OnPropertyChanged("OperatorOverloading");
+				}
+			}
+		}
+
 		bool usingStatement = true;
 		
 		/// <summary>

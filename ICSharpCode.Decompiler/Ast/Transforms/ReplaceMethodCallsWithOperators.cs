@@ -51,11 +51,11 @@ namespace ICSharpCode.Decompiler.Ast.Transforms
 		public override object VisitInvocationExpression(InvocationExpression invocationExpression, object data)
 		{
 			base.VisitInvocationExpression(invocationExpression, data);
-			ProcessInvocationExpression(invocationExpression);
+			ProcessInvocationExpression(invocationExpression, context.Settings);
 			return null;
 		}
 
-		internal static void ProcessInvocationExpression(InvocationExpression invocationExpression)
+		internal static void ProcessInvocationExpression(InvocationExpression invocationExpression, DecompilerSettings settings)
 		{
 			MethodReference methodRef = invocationExpression.Annotation<MethodReference>();
 			if (methodRef == null)
@@ -111,7 +111,34 @@ namespace ICSharpCode.Decompiler.Ast.Transforms
 					}
 					break;
 			}
-			
+
+			if (methodRef.Name == "op_Explicit" && arguments.Length == 1) {
+				if (!settings.OperatorOverloading) {
+					InsertCommentForOverloadedCastInvocation(invocationExpression, methodRef);
+					return;
+				}
+
+				arguments[0].Remove(); // detach argument
+				invocationExpression.ReplaceWith(
+					arguments[0].CastTo(AstBuilder.ConvertType(methodRef.ReturnType, methodRef.MethodReturnType))
+					.WithAnnotation(methodRef)
+				);
+				return;
+			}
+
+			if (methodRef.Name == "op_Implicit" && arguments.Length == 1) {
+				if (!settings.OperatorOverloading) {
+					InsertCommentForOverloadedCastInvocation(invocationExpression, methodRef);
+					return;
+				}
+
+				invocationExpression.ReplaceWith(arguments[0]);
+				return;
+			}
+
+			if (!settings.OperatorOverloading && methodRef.DeclaringType.Namespace != "System")
+				return;
+
 			BinaryOperatorType? bop = GetBinaryOperatorTypeFromMetadataName(methodRef.Name);
 			if (bop != null && arguments.Length == 2) {
 				invocationExpression.Arguments.Clear(); // detach arguments from invocationExpression
@@ -128,24 +155,22 @@ namespace ICSharpCode.Decompiler.Ast.Transforms
 				);
 				return;
 			}
-			if (methodRef.Name == "op_Explicit" && arguments.Length == 1) {
-				arguments[0].Remove(); // detach argument
-				invocationExpression.ReplaceWith(
-					arguments[0].CastTo(AstBuilder.ConvertType(methodRef.ReturnType, methodRef.MethodReturnType))
-					.WithAnnotation(methodRef)
-				);
-				return;
-			}
-			if (methodRef.Name == "op_Implicit" && arguments.Length == 1) {
-				invocationExpression.ReplaceWith(arguments[0]);
-				return;
-			}
 			if (methodRef.Name == "op_True" && arguments.Length == 1 && invocationExpression.Role == Roles.Condition) {
 				invocationExpression.ReplaceWith(arguments[0]);
 				return;
 			}
 			
 			return;
+		}
+
+		static void InsertCommentForOverloadedCastInvocation(InvocationExpression invocationExpression, MethodReference methodRef)
+		{
+			var type = AstBuilder.ConvertType(methodRef.ReturnType);
+			invocationExpression.Parent.InsertChildBefore(
+				invocationExpression,
+				new Comment(type.ToString(), CommentType.MultiLine),
+				Roles.Comment
+			);
 		}
 		
 		static BinaryOperatorType? GetBinaryOperatorTypeFromMetadataName(string name)
