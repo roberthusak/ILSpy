@@ -161,7 +161,9 @@ namespace ICSharpCode.Decompiler.ILAst
 					modified |= block.RunOptimization(new SimpleControlFlow(context, method).SimplifyCustomShortCircuit);
 
 					if (abortBeforeStep == ILAstOptimizationStep.SimplifyLiftedOperators) return;
-					modified |= block.RunOptimization(SimplifyLiftedOperators);
+					if (context.Settings.LiftedOperators) {
+						modified |= block.RunOptimization(SimplifyLiftedOperators);
+					}
 					
 					if (abortBeforeStep == ILAstOptimizationStep.TransformArrayInitializers) return;
 					modified |= block.RunOptimization(TransformArrayInitializers);

@@ -293,7 +293,24 @@ namespace ICSharpCode.Decompiler
 				}
 			}
 		}
-		
+
+		bool liftedOperators = true;
+
+		/// <summary>
+		/// Gets/Sets whether to simplify lifted operators (e.g. a &gt; b where a is <see cref="Nullable{}" />)
+		/// </summary>
+		public bool LiftedOperators
+		{
+			get { return liftedOperators; }
+			set
+			{
+				if (liftedOperators != value) {
+					liftedOperators = value;
+					OnPropertyChanged("LiftedOperators");
+				}
+			}
+		}
+
 		bool showXmlDocumentation = true;
 		
 		/// <summary>
