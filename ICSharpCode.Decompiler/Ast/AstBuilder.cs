@@ -86,7 +86,7 @@ namespace ICSharpCode.Decompiler.Ast
 				} else if (type.IsCompilerGenerated()) {
 					if (settings.ArrayInitializers && type.Name.StartsWith("<PrivateImplementationDetails>", StringComparison.Ordinal))
 						return true;
-					if (type.IsAnonymousType())
+					if (settings.AnonymousTypes && type.IsAnonymousType())
 						return true;
 				}
 			}
