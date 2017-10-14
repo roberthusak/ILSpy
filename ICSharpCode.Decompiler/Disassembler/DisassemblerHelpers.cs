@@ -52,10 +52,14 @@ namespace ICSharpCode.Decompiler.Disassembler
 		
 		public static void WriteTo(this ExceptionHandler exceptionHandler, ITextOutput writer)
 		{
+			// Cecil end-handler properties (e.g. TryEnd) ar exclusive: they reference first
+			// instruction after the end of handler instead of the last instruction in handler --
+			// that's why we use Previous here.
+
 			writer.Write("Try ");
 			WriteOffsetReference(writer, exceptionHandler.TryStart);
 			writer.Write('-');
-			WriteOffsetReference(writer, exceptionHandler.TryEnd);
+			WriteOffsetReference(writer, exceptionHandler.TryEnd.Previous);
 			writer.Write(' ');
 			writer.Write(exceptionHandler.HandlerType.ToString());
 			if (exceptionHandler.FilterStart != null) {
@@ -70,9 +74,21 @@ namespace ICSharpCode.Decompiler.Disassembler
 			writer.Write(' ');
 			WriteOffsetReference(writer, exceptionHandler.HandlerStart);
 			writer.Write('-');
-			WriteOffsetReference(writer, exceptionHandler.HandlerEnd);
+			WriteOffsetReference(writer, exceptionHandler.HandlerEnd?.Previous ?? FindLastInstructionInMethod(exceptionHandler.HandlerStart));
 		}
-		
+
+		static Instruction FindLastInstructionInMethod(Instruction instruction)
+		{
+			// TODO: This would be easier if we had a whole method body directly,
+			// however that isn't easily available to its caller.
+			var last = instruction;
+			while (last.Next != null)
+			{
+				last = last.Next;
+			}
+			return last;
+		}
+
 		public static void WriteTo(this Instruction instruction, ITextOutput writer)
 		{
 			writer.WriteDefinition(CecilExtensions.OffsetToString(instruction.Offset), instruction);
