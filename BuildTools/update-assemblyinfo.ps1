@@ -9,26 +9,22 @@ function Test-File([string]$filename) {
     return [System.IO.File]::Exists( (Join-Path (Get-Location) $filename) );
 }
 
-function Test-Dir([string]$name) {
-    return [System.IO.Directory]::Exists( (Join-Path (Get-Location) $name) );
-}
-
 function gitVersion() {
-    if (-not (Test-Dir ".git")) {
+    if (-not (Test-Path ".git")) {
         return 1;
     }
     return [Int32]::Parse((git rev-list --count "$baseCommit..HEAD")) + $baseCommitRev;
 }
 
 function gitCommitHash() {
-    if (-not (Test-Dir ".git")) {
+    if (-not (Test-Path ".git")) {
         return "";
     }
     return (git rev-list "$baseCommit..HEAD") | Select -First 1;
 }
 
 function gitBranch() {
-    if (-not (Test-Dir ".git")) {
+    if (-not (Test-Path ".git")) {
         return "";
     }
 
