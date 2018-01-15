@@ -199,8 +199,8 @@ namespace ICSharpCode.Decompiler.Ast
 			
 			if (!onlyAssemblyLevel) {
 				foreach (TypeDefinition typeDef in moduleDefinition.Types) {
-					// Skip the <Module> class
-					if (typeDef.Name == "<Module>") continue;
+					// Skip the <Module> and <Script> classes
+					if (typeDef.Name == "<Module>" || typeDef.Name == "<Script>") continue;
 					// Skip any hidden types
 					if (AstBuilder.MemberIsHidden(typeDef, context.Settings))
 						continue;

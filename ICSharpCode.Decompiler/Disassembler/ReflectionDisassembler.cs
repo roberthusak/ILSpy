@@ -1156,6 +1156,9 @@ namespace ICSharpCode.Decompiler.Disassembler
 		public void WriteModuleContents(ModuleDefinition module)
 		{
 			foreach (TypeDefinition td in module.Types) {
+				// Skip the <Script> class produced by Peachpie
+				if (td.Name == "<Script>") continue;
+
 				DisassembleType(td);
 				output.WriteLine();
 			}
